@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="manifest" href='data:application/manifest+json,{"name":"Student Ranking","short_name":"Ranking","start_url":".","display":"standalone","background_color":"#e8edf3","theme_color":"#4CAF50","icons":[{"src":"data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%220.9em%22 font-size=%2290%22>🏆</text></svg>","sizes":"any","type":"image/svg+xml"}]}'>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#4CAF50">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Ranking">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🏆</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🏆</text></svg>">
+<title>Student Ranking</title>
+<style>
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    margin: 6px;
+    background: linear-gradient(135deg, #e8edf3 0%, #d3dce6 100%);
+    background-attachment: fixed;
+    position: relative;
+    min-height: 100vh;
+}
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+        repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255,255,255,.05) 35px, rgba(255,255,255,.05) 70px),
+        repeating-linear-gradient(-45deg, transparent, transparent 35px, rgba(0,0,0,.02) 35px, rgba(0,0,0,.02) 70px);
+    pointer-events: none;
+    z-index: 0;
+}
+body > * {
+    position: relative;
+    z-index: 1;
+}
+h2 {
+    text-align: center;
+    color: #2c3e50;
+    margin: 2px 0 1px 0;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-weight: bold;
+    font-style: normal;
+    font-size: 24px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.15), 0 1px 0 rgba(255,255,255,0.9);
+}
+.ranking-symbol {
+    text-align: center;
+    font-size: 28px;
+    margin: 0 0 4px 0;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-style: italic;
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));
+}
+input {
+    width: 100%;
+    padding: 14px 16px;
+    margin: 2px 0;
+    font-size: 16px;
+    box-sizing: border-box;
+    border: 1px solid #c5d0dc;
+    border-radius: 8px;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-style: normal;
+    font-weight: normal;
+    color: #333;
+    background: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%);
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.05);
+    transition: all 0.2s ease;
+}
+input:focus {
+    outline: none;
+    border-color: #4096ee;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.08), 0 0 0 3px rgba(64,150,238,0.12);
+    background: #fff;
+}
+input::placeholder {
+    color: #94a3b8;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-style: normal;
+}
+/* Watermarks - top left and right */
+.watermark-right {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    font-size: 8px;
+    color: #64748b;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-style: italic;
+    font-weight: normal;
+}
+.watermark-left {
+    position: absolute;
+    top: 5px;
+    left: 10px;
+    font-size: 8px;
+    color: #64748b;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-style: italic;
+    font-weight: normal;
+}
+/* Glossy button base style */
+button {
+    width: 100%; padding: 12px; margin: 2px 0;
+    font-size: 16px; box-sizing: border-box;
+    border: none; border-radius: 8px;
+    font-weight: bold; cursor: pointer;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.2);
+    box-shadow: 0 3px 5px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.4);
+    background: linear-gradient(to bottom, #f8f8f8 0%, #d1d1d1 100%);
+    color: #555;
+    transition: all 0.1s ease;
+}
+button:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.4);
+}
+/* Add Student button - blue with Call button shadow + bold + label shadow */
+#addBtn {
+    background: linear-gradient(to bottom, #7abcff 0%, #4096ee 100%);
+    color: #fff;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 18px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.2);
+    box-shadow: 0 4px 8px rgba(64,150,238,0.3),
+                0 2px 4px rgba(0,0,0,0.15),
+                inset 0 1px 0 rgba(255,255,255,0.5);
+}
+#addBtn:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 4px rgba(64,150,238,0.3),
+                0 1px 2px rgba(0,0,0,0.15),
+                inset 0 1px 0 rgba(255,255,255,0.5);
+}
+/* Button row */
+.button-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 2px 0;
+}
+.button-row button { width: 30%; }
+.bunny-icon {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 28px;
+    background: none;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+}
+.bunny-icon:active {
+    transform: translateY(2px);
+}
+#clearBtn {
+    background: linear-gradient(to bottom, #ff7f7f 0%, #e53935 100%);
+    color: #fff;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-style: normal;
+    font-weight: bold;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.2);
+}
+#rankBtn {
+    background: linear-gradient(to bottom, #8bc34a 0%, #4CAF50 100%);
+    color: #fff;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 14px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.2);
+}
+/* Professional table */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+    margin-top: 6px;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.1);
+}
+thead tr {
+    background: linear-gradient(to bottom, #4CAF50 0%, #45a049 100%);
+}
+th {
+    color: white;
+    padding: 8px 12px;
+    text-align: left;
+    font-size: 14px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    border: none;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-style: normal;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.2);
+}
+td {
+    padding: 8px 12px;
+    text-align: left;
+    font-size: 14px;
+    border: none;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-style: normal;
+    vertical-align: middle;
+    word-wrap: break-word;
+}
+/* Only add border when color changes */
+tbody tr + tr.marks-color-white td,
+tbody tr + tr.marks-color-gray td {
+    border-top: 1px solid rgba(0,0,0,0.06);
+}
+tbody tr:hover { background-color: rgba(0,0,0,0.02)!important; }
+/* Row colors: white/dark gray by position */
+tbody tr.marks-color-white { background-color: #ffffff; }
+tbody tr.marks-color-gray { background-color: #4b5563; color: #fff; }
+tbody tr.marks-color-gray td { color: #fff; }
+/* Action buttons - small glossy */
+.edit {
+    background: linear-gradient(to bottom, #64b5f6 0%, #2196F3 100%);
+    color: #fff; padding: 4px 10px; width: auto; margin-right: 5px;
+    border-radius: 6px; font-size: 12px;
+}
+.delete {
+    background: linear-gradient(to bottom, #ff7f7f 0%, #f44336 100%);
+    color: #fff; padding: 4px 10px; width: auto;
+    border-radius: 6px; font-size: 12px;
+}
+.save {
+    background: linear-gradient(to bottom, #ffb74d 0%, #FF9800 100%);
+    color: #fff; padding: 4px 10px; width: auto;
+    border-radius: 6px; font-size: 12px;
+}
+.error {
+    color: #dc2626;
+    font-size: 14px;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    line-height: 1.2;
+}
+.error:not(:empty) {
+    margin: 1px 0;
+    min-height: 14px;
+}
+.actions { display: flex; gap: 5px; align-items: center; }
+.edit-input {
+    width: 95%; padding: 6px; font-size: 14px;
+    border: 1px solid #ddd; border-radius: 4px;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-style: normal;
+}
+</style>
+</head>
+<body>
+
+<div class="watermark-left">vicSe</div>
+<div class="watermark-right">Madam Shirah</div>
+
+<h2>STUDENT RANKING</h2>
+<div class="ranking-symbol">🏆</div>
+<input type="text" id="name" placeholder="Student Name - letters only">
+<input type="number" id="marks" placeholder="Marks - numbers only">
+<div id="error" class="error"></div>
+<button id="addBtn" onclick="addStudent()">➕ Add Student 📝</button>
+
+<div class="button-row">
+    <button id="clearBtn" onclick="clearAll()">Clear All</button>
+    <div class="bunny-icon">🐇</div>
+    <button id="rankBtn" onclick="rankStudents()">Rank Students</button>
+</div>
+
+<table id="resultTable" style="display:none">
+    <thead>
+        <tr><th>POSITION</th><th>NAME</th><th>MARKS</th><th>ACTION</th></tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+</table>
+
+<script>
+let students = [];
+let editIndex = -1;
+
+function showError(msg) {
+    document.getElementById('error').innerText = msg;
+    setTimeout(() => document.getElementById('error').innerText = '', 3000);
+}
+
+function toTitleCase(str) {
+    return str.toLowerCase().split(' ').map(word => {
+        return word.charAt(0).toUpperCase() + word.slice(1);
+    }).join(' ');
+}
+
+function validateName(name) {
+    if (!name.trim()) return 'Name cannot be empty';
+    if (!/^[A-Za-z ]+$/.test(name)) return 'Name must be letters and spaces only';
+    return '';
+}
+
+function validateMarks(marks) {
+    if (!marks.trim()) return 'Marks cannot be empty';
+    if (!/^\d+$/.test(marks)) return 'Marks must be numbers only';
+    let num = parseInt(marks);
+    if (num < 0 || num > 1000) return 'Enter marks between 0 and 1000';
+    return '';
+}
+
+function addStudent() {
+    let name = document.getElementById('name').value;
+    let marks = document.getElementById('marks').value;
+
+    let nameErr = validateName(name);
+    if (nameErr) return showError(nameErr);
+
+    let marksErr = validateMarks(marks);
+    if (marksErr) return showError(marksErr);
+
+    students.push({name: toTitleCase(name.trim()), marks: parseInt(marks)});
+    document.getElementById('name').value = '';
+    document.getElementById('marks').value = '';
+    students.forEach(s => { delete s.position; });
+    showResults();
+}
+
+function rankStudents() {
+    if (students.length === 0) return showError('Add students first');
+    if (editIndex!== -1) return showError('Finish editing first');
+
+    students.sort((a, b) => b.marks - a.marks);
+
+    let currentPosition = 1;
+    students[0].position = currentPosition;
+
+    for (let i = 1; i < students.length; i++) {
+        if (students[i].marks === students[i-1].marks) {
+            students[i].position = students[i-1].position;
+        } else {
+            currentPosition++;
+            students[i].position = currentPosition;
+        }
+    }
+    showResults();
+}
+
+function editStudent(index) {
+    if (editIndex!== -1) return showError('Save current edit first');
+    editIndex = index;
+    showResults();
+}
+
+function saveEdit(index) {
+    let nameInput = document.getElementById(`name-${index}`).value;
+    let marksInput = document.getElementById(`marks-${index}`).value;
+
+    let nameErr = validateName(nameInput);
+    if (nameErr) return showError(nameErr);
+
+    let marksErr = validateMarks(marksInput);
+    if (marksErr) return showError(marksErr);
+
+    students[index].name = toTitleCase(nameInput.trim());
+    students[index].marks = parseInt(marksInput);
+    students.forEach(s => { delete s.position; });
+    editIndex = -1;
+    showResults();
+}
+
+function cancelEdit() {
+    editIndex = -1;
+    showResults();
+}
+
+function deleteStudent(index) {
+    if (editIndex!== -1) return showError('Finish editing first');
+    students.splice(index, 1);
+    students.forEach(s => { delete s.position; });
+    showResults();
+}
+
+function showResults() {
+    let table = document.getElementById('resultTable');
+    let tbody = document.getElementById('tableBody');
+    tbody.innerHTML = '';
+
+    if (students.length === 0) {
+        table.style.display = 'none';
+        return;
+    }
+
+    table.style.display = 'table';
+    students.forEach((s, i) => {
+        let row = tbody.insertRow();
+
+        // Color by position: same position = same color
+        if (s.position) {
+            if (s.position % 2 === 1) row.classList.add('marks-color-white');
+            else row.classList.add('marks-color-gray');
+        } else {
+            // Before ranking, just alternate by index
+            if (i % 2 === 0) row.classList.add('marks-color-white');
+            else row.classList.add('marks-color-gray');
+        }
+
+        if (i === editIndex) {
+            row.innerHTML = `
+                <td>-</td>
+                <td><input class="edit-input" id="name-${i}" value="${s.name}"></td>
+                <td><input class="edit-input" id="marks-${i}" type="number" value="${s.marks}"></td>
+                <td class="actions">
+                    <button class="save" onclick="saveEdit(${i})">Save</button>
+                    <button class="delete" onclick="cancelEdit()">Cancel</button>
+                </td>
+            `;
+        } else {
+            row.innerHTML = `
+                <td>${s.position || '-'}</td>
+                <td>${s.name}</td>
+                <td>${s.marks}</td>
+                <td class="actions">
+                    <button class="edit" onclick="editStudent(${i})">Edit</button>
+                    <button class="delete" onclick="deleteStudent(${i})">X</button>
+                </td>
+            `;
+        }
+    });
+}
+
+function clearAll() {
+    if (editIndex!== -1) return showError('Finish editing first');
+    if (students.length > 0 &&!confirm('Delete all students?')) return;
+    students = [];
+    showResults();
+}
+
+setInterval(() => {
+    if (editIndex === -1) localStorage.setItem('students', JSON.stringify(students));
+}, 1000);
+
+window.onload = () => {
+    let saved = localStorage.getItem('students');
+    if (saved) {
+        students = JSON.parse(saved);
+        // Fix old saved names to title case
+        students.forEach(s => s.name = toTitleCase(s.name));
+        showResults();
+    }
+}
+// Register service worker for PWA install
+if ('serviceWorker' in navigator) {
+    const swCode = `
+        self.addEventListener('install', e => self.skipWaiting());
+        self.addEventListener('activate', e => e.waitUntil(clients.claim()));
+        self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => new Response(''))));
+    `;
+    const blob = new Blob([swCode], {type: 'application/javascript'});
+    const swUrl = URL.createObjectURL(blob);
+    navigator.serviceWorker.register(swUrl);
+}
+</script>
+
+</body>
+</html>
